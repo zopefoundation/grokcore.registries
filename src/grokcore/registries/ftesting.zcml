@@ -5,6 +5,7 @@
    package="grokcore.registries">
 
   <include package="grokcore.component" file="meta.zcml" />
+  <include package="grokcore.view" file="meta.zcml" />
   <include package="grokcore.registries" file="meta.zcml" />
   <include package="grokcore.registries" />
 

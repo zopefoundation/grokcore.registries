@@ -7,5 +7,6 @@
   >>> pprint([x for x in registries])
   [(u'chained_registry', <BaseComponents chained_registry>),
    (u'specialRegistry', <BaseComponents specialRegistry>),
-   (u'my_registry', <BaseComponents my_registry>)]
+   (u'my_registry', <BaseComponents my_registry>),
+   (u'otherRegistry', <BaseComponents otherRegistry>)]
 """
