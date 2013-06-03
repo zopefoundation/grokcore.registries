@@ -19,19 +19,30 @@
   >>> from grokcore.component import Context
   >>> context = Context()
   >>> from zope.component import getMultiAdapter
-  >>> getMultiAdapter((context, request), name='page')
+  >>> view = getMultiAdapter((context, request), name='page')
+  >>> view.render()
+  u'I Am grabbed from GSM'
+
+
+  >>> from zope.interface import alsoProvides
+  >>> from grokcore.registries.tests.registries.local import PartyLayer
+  >>> alsoProvides(request, PartyLayer)
+  >>> view = getMultiAdapter((context, request), name='page')
+  >>> view.render()
+  u"I am grabbed from local registry"
 
 
   >>> setSite()
 """
 
+from zope.component import getGlobalSiteManager
 from zope.interface import implements
 from zope.component.registry import Components
 from grokcore.registries import create_components_registry
 from grokcore.registries.tests.registries.interfaces import IExample
 
 
-otherRegistry = create_components_registry(name="otherRegistry")
+otherRegistry = create_components_registry(name="otherRegistry", bases=(getGlobalSiteManager(),))
 
 
 class Example(object):
