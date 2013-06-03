@@ -1,34 +1,39 @@
 """
- >>> root = {}
- >>> root['app'] = MyApplication()
+  >>> root = {}
+  >>> root['app'] = MyApplication()
 
- >>> from zope.component import getUtility
- >>> from grokcore.registries.tests.registries.interfaces import IExample
+  >>> gl = Example('local')
+ 
+  >>> otherRegistry.registerUtility(gl, IExample, name="global")
+  
+  >>> from zope.component.hooks import setSite
+  >>> from zope.component import getUtility
+  
+  >>> setSite(root['app'])
+  >>> result = getUtility(IExample, name="global")
+  >>> print str(result)
+  local
 
- >>> getUtility(IExample, name=u'global')
- <grokcore.registries.tests.registries.global.MyExample object at ...>
-
- >>> getUtility(IExample, name=u'local')
- Traceback (most recent call last):
- ...
- ComponentLookupError: (<InterfaceClass grokcore.registries.tests.registries.interfaces.IExample>, u'local')
-
- >>> specialRegistry.getUtility(IExample, name=u'local')
- <grokcore.registries.tests.registries.local.MyExample object at ...>
-
- >>> from zope.component.hooks import setSite
- >>> app = root['app']
- >>> setSite(root['app'])
-
- >>> getUtility(IExample, name=u'local')
- <grokcore.registries.tests.registries.local.MyExample object at ...>
-
- >>> setSite()
-
+  >>> setSite()
 """
 
+from zope.interface import implements
 from zope.component.registry import Components
-from grokcore.registries.ftests.registries.basic import specialRegistry
+from grokcore.registries import create_components_registry
+from grokcore.registries.tests.registries.interfaces import IExample
+
+
+otherRegistry = create_components_registry(name="otherRegistry")
+
+
+class Example(object):
+    implements(IExample)
+    
+    def __init__(self, desc):
+        self.desc = desc
+
+    def __str__(self):
+        return str(self.desc)
 
 
 class MyApplication(object):
@@ -38,5 +43,5 @@ class MyApplication(object):
 
     def getSiteManager(self):
         current = self._sm
-        current.__bases__ += (specialRegistry,)
+        current.__bases__ += (otherRegistry,)
         return current
