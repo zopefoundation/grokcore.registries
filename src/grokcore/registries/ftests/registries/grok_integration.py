@@ -2,17 +2,25 @@
   >>> root = {}
   >>> root['app'] = MyApplication()
 
-  >>> gl = Example('local')
-
-  >>> otherRegistry.registerUtility(gl, IExample, name="global")
-
   >>> from zope.component.hooks import setSite
   >>> from zope.component import getUtility
 
-  >>> setSite(root['app'])
   >>> result = getUtility(IExample, name="global")
-  >>> print str(result)
-  local
+  >>> result
+  <grokcore.registries.tests.registries.global.MyExample object at ...>
+
+  >>> getUtility(IExample, name=u'local')
+  Traceback (most recent call last):
+  ...
+  ComponentLookupError: (<InterfaceClass grokcore.registries.tests.registries.interfaces.IExample>, u'local')
+
+
+  >>> setSite(root['app'])
+
+  >>> result = getUtility(IExample, name=u'local')
+  >>> result
+  <grokcore.registries.tests.registries.local.MyExample object at 0...>
+
 
   >>> from zope.publisher.browser import TestRequest
   >>> request = TestRequest()
@@ -29,30 +37,21 @@
   >>> alsoProvides(request, PartyLayer)
   >>> view = getMultiAdapter((context, request), name='page')
   >>> view.render()
-  u"I am grabbed from local registry"
+  u'I am grabbed from local registry'
 
 
   >>> setSite()
 """
 
-from zope.component import getGlobalSiteManager
 from zope.interface import implements
 from zope.component.registry import Components
 from grokcore.registries import create_components_registry
 from grokcore.registries.tests.registries.interfaces import IExample
 
 
-otherRegistry = create_components_registry(name="otherRegistry", bases=(getGlobalSiteManager(),))
+from grokcore.registries.ftests.registries.basic import specialRegistry
 
 
-class Example(object):
-    implements(IExample)
-
-    def __init__(self, desc):
-        self.desc = desc
-
-    def __str__(self):
-        return str(self.desc)
 
 
 class MyApplication(object):
@@ -62,5 +61,6 @@ class MyApplication(object):
 
     def getSiteManager(self):
         current = self._sm
-        current.__bases__ += (otherRegistry,)
+        current.__bases__ = (specialRegistry,) + current.__bases__
         return current
+
